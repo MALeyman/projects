@@ -7,6 +7,14 @@ from torchvision.ops import nms
 from PIL import Image
 import os 
 import numpy as np
+import cv2
+from ultralytics import YOLO
+
+
+
+
+
+
 
 def inference_model_custom(model, image_path, device, S=16, B=2, C=8, threshold=0.3, iou_thresh=0.3, image_size = 736):
     model.eval()
@@ -214,6 +222,149 @@ def inference_model_grid_net(
     plt.show()
 
 
+
+
+
+def inference_model(model, image_path, imgsz=736, conf_thres=0.25, font_scale=0.6):
+    """
+    Быстрый инференс Ultralytics-YOLO + отрисовка боксов
+    ---------------------------------------------------
+    model      : загруженный YOLO (YOLO("best.pt"))
+    image_path : str | Path | np.ndarray | PIL.Image
+    imgsz      : сторона, к которой YOLO приведёт картинку
+    conf_thres : порог уверенности для вывода бокса
+    font_scale : размер надписи в cv2.putText
+    """
+
+    results = model(image_path, imgsz=imgsz, conf=conf_thres, verbose=False)
+    boxes = results[0].boxes  # results.Boxes
+
+    # если ничего не найдено – просто показать исходник
+    if boxes is None or boxes.xyxy.shape[0] == 0:
+        if isinstance(image_path, (str, bytes)):
+            img = cv2.cvtColor(cv2.imread(image_path), cv2.COLOR_BGR2RGB)
+        else:  # np.ndarray или PIL
+            img = np.array(image_path)
+            if img.ndim == 3 and img.shape[2] == 3:
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        plt.imshow(img)
+        plt.axis('off')
+        plt.show()
+        return
+
+    #  загружаем изображение BGR 
+    if isinstance(image_path, (str, bytes)):
+        image_cv = cv2.imread(image_path)
+    elif isinstance(image_path, Image.Image):
+        image_cv = cv2.cvtColor(np.array(image_path), cv2.COLOR_RGB2BGR)
+    else:  # np.ndarray 
+        image_cv = cv2.cvtColor(image_path, cv2.COLOR_RGB2BGR)
+
+    #  отрисовка 
+    for (x1, y1, x2, y2), cls, conf in zip(boxes.xyxy.cpu().numpy(),
+                                           boxes.cls.cpu().numpy(),
+                                           boxes.conf.cpu().numpy()):
+        x1, y1, x2, y2 = map(int, (x1, y1, x2, y2))
+        label_name = model.names[int(cls)]
+        caption = f"{label_name} {conf:.2f}"
+
+        cv2.rectangle(image_cv, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        formatted_score = f"{conf:.2f}"
+        text = f"{int(cls)} {formatted_score}"
+
+ 
+        cv2.putText(image_cv, text, (x1, y1 - 2),
+                    cv2.FONT_HERSHEY_SIMPLEX, font_scale,
+                    (0, 255, 0), thickness=1, lineType=cv2.LINE_AA)
+
+    image_rgb = cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
+    plt.figure(figsize=(12, 12))
+    plt.imshow(image_rgb)
+    plt.axis('off')
+    plt.show()
+
+
+
+# ========== YOLO Inference и отрисовка цветные боксы
+def inference_model_yolo(model, image_path, conf_threshold=0.3, image_size=736):
+
+    # ======= Классы и цвета
+    CLASS_NAMES = ['building', 'plane', 'fish net', 'harbor', 'well', 'helicopter', 'vehicle', 'ship']
+
+    CLASS_COLORS = [
+        (0, 255, 0),     # зелёный
+        (0, 0, 255),     # красный
+        (255, 0, 0),     # синий
+        (0, 255, 255),   # жёлтый
+        (255, 0, 255),   # фиолетовый
+        (255, 255, 0),   # голубой
+        (0, 0, 255),     # красный
+        (0, 0, 128),     # тёмно-красный
+        (128, 0, 128),   # пурпурный
+        (0, 128, 255),   # оранжево-синий
+        (255, 128, 0),   # оранжевый
+        (0, 0, 128),     # тёмно-красный
+        (0, 128, 0),     # тёмно-зелёный
+        (128, 0, 0),     # бордовый
+        (128, 128, 0),   # оливковый
+    ]
+
+
+    model.eval()
+    
+    image = Image.open(image_path).convert("RGB")
+    image_cv = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+
+    # Предсказание
+    with torch.no_grad():
+        results = model(image)
+
+    boxes = results[0].boxes
+
+    for (x1, y1, x2, y2), cls, conf in zip(boxes.xyxy.cpu().numpy(),
+                                           boxes.cls.cpu().numpy(),
+                                           boxes.conf.cpu().numpy()):
+        if conf < conf_threshold:
+            continue
+        
+        x1, y1, x2, y2 = map(int, (x1, y1, x2, y2))
+        class_id = int(cls)
+        class_name = CLASS_NAMES[class_id]
+        color = CLASS_COLORS[class_id % len(CLASS_COLORS)]
+
+        #  боксы
+        cv2.rectangle(image_cv, (x1, y1), (x2, y2), color, 2)
+
+        # Подпись (имя класса + уверенность)
+        # label = f"{class_id} {conf:.2f}"
+        label = f"{conf:.2f}"
+        cv2.putText(image_cv, label, (x1, y1 - 5),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1, lineType=cv2.LINE_AA)
+
+
+    image_rgb = cv2.cvtColor(image_cv, cv2.COLOR_BGR2RGB)
+    plt.figure(figsize=(12, 12))
+    plt.imshow(image_rgb)
+    plt.title("YOLO Inference")
+    plt.axis('off')
+    plt.show()
+
+
+ # Вычисление метрик модели Yolo
+def metrics_model(model, split="test", iou=0.5):
+    model.eval();
+    with torch.no_grad():
+        metrics = model.val(data="data_1.yaml", split=split, iou=iou)
+    precision = metrics.box.p.mean().item()    # Precision
+    recall = metrics.box.r.mean().item()       # Recall
+    map50 = metrics.box.map50.mean().item()    # AP50 (IoU=0.5)
+    map50_95 = metrics.box.maps.mean().item()  # mAP50-95
+
+    print("\n=== Итоговые метрики по тестовому набору ===")
+    print(f"Средняя точность (Precision): {precision:.3f}")
+    print(f"Средняя полнота (Recall): {recall:.3f}")
+    print(f"Средняя AP50 (IoU={iou:.2f}): {map50:.3f}")
+    print(f"Средний mAP50-95: {map50_95:.3f}")
 
 
 
