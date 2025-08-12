@@ -13,6 +13,7 @@
 | VAE_GAN_Face_Transformer     |Трансформация лиц (VAE-GAN)     | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/CV/VAE_GAN_Face_Transformer/vae_gan.ipynb)  |
 | Unet_Segmentation           |Сегментация Carvana (UNet)           | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/CV/Unet_Segmentation/unet_segmentation.ipynb)  |
 | Unet_Segmentation_2         |Сегментация Cityscapes  (UNet, DeepLab)           | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/CV/Unet_Segmentation_2)  |
+| CNN_Sudoku_Scanner        |Сканер судоку MNIST (CNN, WarpTransform)      | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/CV/CNN_Sudoku_Scanner/sudoku_scanner.ipynb)  |
 
 --------------------------------
 
