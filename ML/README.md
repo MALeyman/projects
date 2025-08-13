@@ -22,6 +22,18 @@
 | Классификация       |Классификация             | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/Classification)  | 
 | obesity_classification.ipyn    | Классификация ожирения (KNN, логистическая регрессия...)  | [GitHub]   |
 
+--------------------------
+
+###  Регрессия
+
+| Название                   | Описание                       | Ссылка                           |
+|----------------------------|--------------------------------|----------------------------------------------|
+| Регрессия       |Регрессия             | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/Regression)  | 
+| arima_sarima.ipyn    | Временные ряды  (ARIMA, SARIMA)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/ARIMA_SARIMA/arima_sarima.ipynb)  |
+| polinom_regression.ipyn    | Линейная регрессия (LinearRegression, sm.OLS)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/Linear_Regression/polinom_regression.ipynb)  |
+
+
+------------------------
 
 (https://github.com/MALeyman/projects/blob/main/ML/Classification/obesity_classification/obesity_classification.ipynb)  |
 
