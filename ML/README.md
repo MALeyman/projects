@@ -19,6 +19,10 @@
 
 | Название                   | Описание                       | Ссылка                           |
 |----------------------------|--------------------------------|----------------------------------------------|
-| obesity_classification.ipyn    | Классификация ожирения (KNN, логистическая регрессия...)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Classification/obesity_classification/obesity_classification.ipynb)  |
+| Классификация       |Классификация             | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/Classification)  | 
+| obesity_classification.ipyn    | Классификация ожирения (KNN, логистическая регрессия...)  | [GitHub]   |
+
+
+(https://github.com/MALeyman/projects/blob/main/ML/Classification/obesity_classification/obesity_classification.ipynb)  |
 
 ---------------------------------------
