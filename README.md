@@ -17,5 +17,25 @@
 | CNN_Sudoku_Scanner        |Сканер судоку MNIST (CNN, WarpTransform)      | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/CV/CNN_Sudoku_Scanner/sudoku_scanner.ipynb)  | Классификация |
 | LeNet        | Классификация Fashion MNIST (LeNet)      | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/CV/LeNet/LeNet.ipynb)  | Классификация |
 
---------------------------------
+-----------------------------
 
+## [Классификация](https://github.com/MALeyman/projects/tree/main/ML/Classification)
+
+| Название                   | Описание                       | Ссылка                           |
+|----------------------------|--------------------------------|----------------------------------------------|
+| Классификация       |Классификация             | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/Classification)  | 
+| obesity_classification.ipyn | Классификация ожирения (KNN, лог. регрессия...) | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Classification/obesity_classification/obesity_classification.ipynb)  |
+| svm_classification.ipynb | Классификация   SVM | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Classification/SVM/svm_classification.ipynb)  | 
+
+--------------------------
+
+##  [Регрессия](https://github.com/MALeyman/projects/tree/main/ML/Regression)
+
+| Название                   | Описание                       | Ссылка                           |
+|----------------------------|--------------------------------|----------------------------------------------|
+| Регрессия       |Регрессия             | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/Regression)  | 
+| arima_sarima.ipyn    | Временные ряды  (ARIMA, SARIMA)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/ARIMA_SARIMA/arima_sarima.ipynb)  |
+| polinom_regression.ipyn    | Линейная регрессия (LinearRegression, sm.OLS)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/Linear_Regression/polinom_regression.ipynb)  |
+
+
+------------------------
