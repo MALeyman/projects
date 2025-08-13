@@ -20,7 +20,7 @@
 | Название                   | Описание                       | Ссылка                           |
 |----------------------------|--------------------------------|----------------------------------------------|
 | Классификация       |Классификация             | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/Classification)  | 
-| obesity_classification.ipyn | Классификация ожирения (KNN, лог. регрессия...) | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Classification/obesity_classification/obesity_classification.ipynb)  |
+| obesity_classification.ipynb | Классификация ожирения (KNN, лог. регрессия...) | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Classification/obesity_classification/obesity_classification.ipynb)  |
 | svm_classification.ipynb | Классификация   SVM | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Classification/SVM/svm_classification.ipynb)  | 
 
 --------------------------
@@ -30,8 +30,8 @@
 | Название                   | Описание                       | Ссылка                           |
 |----------------------------|--------------------------------|----------------------------------------------|
 | Регрессия       |Регрессия             | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/Regression)  | 
-| arima_sarima.ipyn    | Временные ряды  (ARIMA, SARIMA)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/ARIMA_SARIMA/arima_sarima.ipynb)  |
-| polinom_regression.ipyn    | Линейная регрессия (LinearRegression, sm.OLS)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/Linear_Regression/polinom_regression.ipynb)  |
+| arima_sarima.ipynb | Временные ряды  (ARIMA, SARIMA)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/ARIMA_SARIMA/arima_sarima.ipynb)  |
+| polinom_regression.ipynb | Линейная регрессия (LinearRegression, sm.OLS)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/Linear_Regression/polinom_regression.ipynb)  |
 
 
 ------------------------
