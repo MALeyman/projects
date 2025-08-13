@@ -12,3 +12,13 @@
 | Unet_Segmentation_2         |Сегментация Cityscapes  (UNet, DeepLab)           | [GitHub](https://github.com/MALeyman/projects/tree/main/ML/CV/Unet_Segmentation_2)  | Сегментация |
 | CNN_Sudoku_Scanner        |Сканер судоку MNIST (CNN, WarpTransform)      | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/CV/CNN_Sudoku_Scanner/sudoku_scanner.ipynb)  | Классификация |
 | LeNet        | Классификация Fashion MNIST (LeNet)      | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/CV/LeNet/LeNet.ipynb)  | Классификация |
+
+-----------------------------
+
+### Классификация 
+
+| Название                   | Описание                       | Ссылка                           |
+|----------------------------|--------------------------------|----------------------------------------------|
+| obesity_classification.ipyn    | Классификация ожирения (KNN, логистическая регрессия...)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Classification/obesity_classification/obesity_classification.ipynb)  |
+
+---------------------------------------
