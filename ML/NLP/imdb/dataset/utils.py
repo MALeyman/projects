@@ -47,7 +47,7 @@ def transform_text_2(text1, vocab, len_text, rand=False):
         if len(mass) > len_text - 1:
             return mass
         if ch != ' ':
-            str1 += ch
+            str1 = str1 + ch
         if ch == ' ':
             if str1 != '':
                 fl = False
@@ -171,7 +171,7 @@ def read_file(file1):
         text = f1.read()
         print(text)
         f1.close
-
+    return text
 
 
 # функция разбивает исходный датасет по классам (по рейтингу)
@@ -219,6 +219,7 @@ def vocab_read(path_vocab):
     with open(path_vocab, "r") as f1:
         line = f1.read().splitlines()
     return line
+
 
 
 
