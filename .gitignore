@@ -5,3 +5,5 @@ ML/CV/LeNet/data/
 ML/NLP/imdb/data/
 ML/NLP/imdb/dataset/__pycache__/
 README.md
+ML/NLP/imdb/utils/__pycache__/
+ML/NLP/imdb/models/

@@ -4,16 +4,63 @@ import numpy as np
 from glob import glob
 import pickle
 import shutil
+import torch
+
+
+##### функция преобразования текста в числа для инференса
+def transform_text_inferens(text1, path_vocab, len_text=280):
+    fl = False 
+    with open(path_vocab, "r") as f1:
+        vocab = f1.read().splitlines()
+    vocab = vocab[:39998]  
+    mass = [] 
+    str1 =''    
+    for ch in text1:
+        if len(mass)>len_text-1: # если слов больше чем нужно, выходим
+            data_tensor = torch.tensor(mass)
+            return data_tensor
+        if ch !=' ':
+            str1 = str1 + ch
+        if ch ==' ':
+            if str1 !='':                      
+                fl = False                                                            
+                for i in range(len(vocab)):
+                    if str1.lower() == vocab[i].lower():
+                        fl = True
+                        mass.append(i+2)
+                        str1 =''
+                        break                                                 
+                if fl == False: #  если слово не найдено, заменяем нулями
+                    mass.append(0)
+                    str1 =''        
+    for i in range(len(vocab)): # Проверяем последнее слово
+        if str1.lower() == vocab[i].lower():
+            fl = True
+            mass.append(i+2)
+            str1 =''
+            break                                                 
+    if fl == False: #  если слово не найдено, заменяем нулями
+        mass.append(0)
+        str1 =''
+
+    if len(mass)<len_text:  #  если слов меньше чем нужно, добавляем нулями.
+        while len(mass)<len_text:
+            mass.insert(0, 0)
+            str1 =''       
+    data_tensor = torch.tensor(mass)    
+    return data_tensor
 
 
 
-# функция преобразования файла текста в файл с числами
-
+# функция преобразования файла текста в массив с числами (Токенами)
 def transform_text_1(file1, path_vocab):
+    ''' 
+    функция преобразования файла текста в массив с числами
+    '''
     # Читаем словарь и создаём маппинг слова -> индекс
     with open(path_vocab, "r") as f_vocab:
         lines = f_vocab.read().splitlines()
-    vocab_dict = {word.lower(): idx+1 for idx, word in enumerate(lines)}
+    vocab_dict = {word.lower(): idx+2 for idx, word in enumerate(lines)}
 
     mass = []
     with open(file1, "r") as f_text:
@@ -102,6 +149,7 @@ def create_balanced_and_test_datasets(base_path, vocab, len_text, rand=False):
         folder_path = os.path.join(base_path, cl)
         files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
         random.shuffle(files)
+        label_mapping = {1:0, 2:1, 3:2, 4:3, 7:4, 8:5, 9:6, 10:7}
 
         # Выбираем min_count файлов для сбалансированного датасета
         balanced_files = files[:min_count]
@@ -115,7 +163,8 @@ def create_balanced_and_test_datasets(base_path, vocab, len_text, rand=False):
                 text = f.read()
             vec = transform_text_2(text, vocab, len_text, rand=rand)
             balanced_data.append(vec)
-            balanced_labels.append(int(cl))
+            balanced_labels.append(label_mapping[int(cl)])
+
 
         # Обработка test
         for file_name in test_files:
@@ -124,7 +173,7 @@ def create_balanced_and_test_datasets(base_path, vocab, len_text, rand=False):
                 text = f.read()
             vec = transform_text_2(text, vocab, len_text, rand=rand)
             test_data.append(vec)
-            test_labels.append(int(cl))
+            test_labels.append(label_mapping[int(cl)])
 
     return balanced_data, balanced_labels, test_data, test_labels
 
@@ -139,27 +188,23 @@ def str_name(str1):
     return os.path.splitext(p)[0]
 
 # функция получения рейтинга отзыва и номера отзыва по имени файла
-def inv1(str1):
-    ''' 
-    функция получения рейтинга отзыва и номера отзыва по имени файла
+def inv1(filename):
     '''
-    l = len(str1)
-    ss = '444'
-    kk = ''
-    for i in range(l):
-        s = str1[i]
-        ss = ss + s
-        if s !='_':
-            continue
-        if s =='_':
-            i = i+1
-            while i < l:
-                ss = ss + str1[i]
-                kk = str1[i]
-                i = i+1
-            break
-    return ss, kk  
-
+    Функция для получения рейтинга отзыва и номера (названия) файла по имени файла.
+    Ожидается, что имя файла имеет формат "номер_рейтинг.txt", например "2429_1.txt".
+    Возвращает кортеж: (рейтинг как строка, имя файла без расширения)
+    '''
+    # Убираем расширение файла
+    base_name = filename.split('.')[0]
+    # Разделяем по подчёркиванию
+    parts = base_name.split('_')
+    if len(parts) < 2:
+        return None, None  # Если формат некорректный
+    
+    rating = parts[-1]  # Рейтинг — часть после последнего подчёркивания
+    file_number = '_'.join(parts[:-1])  # Всё до рейтинга — номер файла (может содержать подчёркивания)
+    
+    return file_number, rating
 
 
 # функция вывода текста  отзыва
@@ -186,7 +231,7 @@ def preprocess_text(mas, cls):
         name_faile, num_class = inv1(str_1)
         name_faile1 = name_faile + '.txt'
         
-        if num_class == '0':
+        if num_class == '10':
             path_new = cls[0]
         elif num_class == '1':
             path_new = cls[1]          
@@ -196,16 +241,12 @@ def preprocess_text(mas, cls):
             path_new = cls[3]
         elif num_class == '4':
             path_new = cls[4]
-        elif num_class == '5':
-            path_new = None             
-        elif num_class == '6':
-            path_new = None
         elif num_class == '7':
-            path_new = cls[7]  
+            path_new = cls[5]  
         elif num_class == '8':
-            path_new = cls[8]
+            path_new = cls[6]
         elif num_class == '9':
-            path_new = cls[9]                    
+            path_new = cls[7]                    
 
                   
         shutil.copy2(str_n, os.path.join(path_new, name_faile1))
