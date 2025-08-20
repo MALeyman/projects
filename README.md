@@ -34,5 +34,13 @@
 | arima_sarima.ipynb    | Временные ряды  (ARIMA, SARIMA)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/ARIMA_SARIMA/arima_sarima.ipynb)  |
 | polinom_regression.ipynb    | Линейная регрессия (LinearRegression, sm.OLS)  | [GitHub](https://github.com/MALeyman/projects/blob/main/ML/Regression/Linear_Regression/polinom_regression.ipynb)  |
 
+-------------------------------   
+
+###  [Gradio](https://github.com/MALeyman/projects/tree/main/Gradio)
+
+| Название                   | Описание                       | Ссылка                           |
+|----------------------------|--------------------------------|----------------------------------------------|
+| gradio   | Демонстрация моделей (детекция, сегментация, интерполяция изображений  | [GitHub](https://github.com/MALeyman/projects/blob/main/Gradio/gradio_projects/main.ipynb)  |
+
 
 ------------------------
