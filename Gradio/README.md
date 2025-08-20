@@ -7,7 +7,7 @@
 
 | Название                   | Описание                       | Ссылка                           |
 |----------------------------|--------------------------------|----------------------------------------------|
-| gradio   | Демонстрация моделей (детекция, сегментация, интерполяция изображений  | [GitHub](https://github.com/MALeyman/projects/blob/main/Gradio/gradio_projects/main.ipynb)  |
+| gradio   | Демонстрация моделей (детекция, сегментация, интерполяция изображений)  | [GitHub](https://github.com/MALeyman/projects/blob/main/Gradio/gradio_projects/main.ipynb)  |
 
 
 ------------------------
