@@ -6,18 +6,12 @@ import os
 import gradio as gr
 
 
-if __name__ == "__main__":
-    # =============   Если запускать с "app.py"
-    from projects.segmentation_1 import get_segmentation_tab
-    from projects.detection_1 import get_detection_tab_1
-    from projects.home_tab import home_tab
-    from projects.detection_2 import get_detection_tab_2
-else:
-    # ===============  Если запускать с ноутбука  "gradio.ipynb"
-    from gradio_projects.projects.segmentation_1 import get_segmentation_tab
-    from gradio_projects.projects.home_tab import home_tab
-    from gradio_projects.projects.detection_1 import get_detection_tab_1
-    from gradio_projects.projects.detection_2 import get_detection_tab_2
+
+from projects.segmentation_1 import get_segmentation_tab
+from projects.home_tab import home_tab
+from projects.detection_1 import get_detection_tab_1
+from projects.detection_2 import get_detection_tab_2
+from projects.interpolated import get_interpolated_tab
 
 def main():
     with gr.Blocks() as demo:
@@ -30,7 +24,10 @@ def main():
                 get_detection_tab_1()
             with gr.TabItem("Детекция с БПЛА"):
                 get_detection_tab_2()
-
+            with gr.TabItem("Интерполяция изображений"):
+                get_interpolated_tab()
+            with gr.TabItem("Классификация отзывов"):
+                get_detection_tab_2()
 
     demo.launch(debug=True)
 

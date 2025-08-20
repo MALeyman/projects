@@ -3,7 +3,6 @@
 """
 
 from torchvision.ops import nms
-
 from typing import Union, Optional, Any, Dict, List, Tuple
 import albumentations as A
 from itertools import product
@@ -17,9 +16,163 @@ import onnxruntime
 from projects.common.session import ort_session, ort_session_2
 import subprocess
 import tempfile
+import torch.nn as nn
+from PIL import Image
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
+
+class Encoder(nn.Module):
+    def __init__(self, latent_dim):
+        super().__init__()
+        self.latent_dim = latent_dim
+
+        self.conv = nn.Sequential(
+            nn.Conv2d(3, 64, 4, 2, 1),  # B,64, 64,64 for 128x128 inputs
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(64, 128, 4, 2, 1),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(128, 256, 4, 2, 1),
+            nn.BatchNorm2d(256),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(256, 512, 4, 2, 1),
+            nn.BatchNorm2d(512),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
+
+        self.fc_mu = nn.Linear(512*8*8, latent_dim)
+        self.fc_logvar = nn.Linear(512*8*8, latent_dim)
+
+    def forward(self, x):
+        batch_size = x.size(0)
+        x = self.conv(x)
+        x = x.view(batch_size, -1)
+        mu = self.fc_mu(x)
+        logvar = self.fc_logvar(x)
+        return mu, logvar
+
+
+class Decoder(nn.Module):
+    def __init__(self, latent_dim):
+        super().__init__()
+        self.fc = nn.Linear(latent_dim, 512*8*8)
+
+        self.deconv = nn.Sequential(
+            nn.ConvTranspose2d(512, 256, 4, 2, 1),  # 256x16x16
+            nn.BatchNorm2d(256),
+            nn.ReLU(inplace=True),
+
+            nn.ConvTranspose2d(256, 128, 4, 2, 1),  # 128x32x32
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+
+            nn.ConvTranspose2d(128, 64, 4, 2, 1),  # 64x64x64
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+
+            nn.ConvTranspose2d(64, 3, 4, 2, 1),  # 3x128x128
+            nn.Sigmoid()  # Чтобы на выходе были пиксели от 0 до 1  
+            # nn.Tanh()  #  Если нормализация
+        )
+
+    def forward(self, z):
+        batch_size = z.size(0)
+        x = self.fc(z)
+        x = x.view(batch_size, 512, 8, 8)
+        x = self.deconv(x)
+        return x
+
+
+
+
+def center_crop_and_preprocess(img: Image.Image):
+    # Центрированный квадрат по наим. стороне и resize
+    w, h = img.size
+    side = min(w, h)
+    left = (w - side) // 2
+    top = (h - side) // 2
+    img = img.crop((left, top, left + side, top + side))
+    img = img.resize((128, 128), Image.Resampling.LANCZOS)
+    img = np.array(img).astype(np.float32) / 255.0
+    # img = (img - mean) / std
+    img = torch.from_numpy(img).permute(2, 0, 1).unsqueeze(0)
+    return img.to(device)
+
+
+def morph_video_1(img1, img2):
+    video_path = morph_video(img1, img2)
+    print("Путь к видео:", video_path)
+    if not os.path.exists(video_path):
+        raise FileNotFoundError(f"Видео не найдено по пути: {video_path}")
+    return video_path
+
+
+# --- Основная функция синтеза морф-видео ---
+def morph_video(im1, im2, n_frames=60):
+    
+    encoder = Encoder(latent_dim=128)
+    decoder = Decoder(latent_dim=128)
+    import os
+    # Получаем директорию, где лежит этот скрипт utils.py
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    path_to_encoder = os.path.join(dir_path, 'encoder.pth')
+    path_to_decoder = os.path.join(dir_path, 'decoder.pth')
+
+
+
+    encoder.load_state_dict(torch.load(path_to_encoder, map_location=device))
+
+
+    encoder.load_state_dict(torch.load(path_to_encoder, map_location=device))
+    decoder.load_state_dict(torch.load(path_to_decoder, map_location=device))
+    encoder.eval()
+    decoder.eval()
+    encoder.to(device)
+    decoder.to(device)
+    
+    # Предобработка
+    t1 = center_crop_and_preprocess(im1)
+    t2 = center_crop_and_preprocess(im2)
+    with torch.no_grad():
+        mu1, _ = encoder(t1)
+        mu2, _ = encoder(t2)
+    z1 = mu1.cpu().numpy()
+    z2 = mu2.cpu().numpy()
+    alphas = np.linspace(0, 1, n_frames)
+    z_interp = [(1 - a) * z1 + a * z2 for a in alphas]
+    z_interp = np.stack(z_interp)
+    z_interp = torch.tensor(z_interp, dtype=torch.float32).to(device)
+    with torch.no_grad():
+        imgs = decoder(z_interp)
+    # imgs = denormalize(imgs).cpu().numpy()  # [N, 3, 128, 128]
+    imgs = imgs.cpu().numpy()
+    
+    # Собираем кадры для видео
+    frames = []
+    for img in imgs:
+        img = np.transpose(img, (1, 2, 0))
+        img = (img * 255).astype(np.uint8)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        frames.append(img)
+
+
+    # Записываем временный mp4-файл
+    temp_dir = "temp_videos"
+    os.makedirs(temp_dir, exist_ok=True)
+    fname = os.path.join(temp_dir, "temp_video.mp4")
+
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    video = cv2.VideoWriter(fname, fourcc, 10, (128, 128), True)
+    for f in frames:
+        video.write(f)
+    video.release()
+    return fname
+
 
 def get_device():
     providers = onnxruntime.get_available_providers()
@@ -27,7 +180,6 @@ def get_device():
         return "Устройство: GPU (CUDA)"
     else:
         return "Устройство: CPU"
-
 
 
 
@@ -109,6 +261,7 @@ def prior_box1(min_sizes, steps, clip, image_size):
                 for cy, cx in product(dense_cy, dense_cx):
                     anchors += [cx, cy, s_kx, s_ky]
 
+    # back to torch land
     output = torch.Tensor(anchors).view(-1, 4)
     if clip:
         output.clamp_(max=1, min=0)
@@ -498,7 +651,7 @@ def onnx_inference(image: np.ndarray, confidence_threshold=0.7, nms_threshold=0.
     else:
         img_rgb = image
 
-    # Запуск предсказания 
+    # Запуск предсказания (здесь вызывается ваша функция predict_jsons1)
     annotation = predict_jsons1(
         ort_session,
         img_rgb,
@@ -530,7 +683,7 @@ def onnx_inference2(image: np.ndarray, confidence_threshold=0.7, nms_threshold=0
     else:
         img_rgb = image
 
-    # Запуск предсказания
+    # Запуск предсказания (здесь вызывается ваша функция predict_jsons1)
     output, h0, w0, imgsz = predict_jsons2(
         ort_session_2,
         img_rgb,
@@ -623,7 +776,7 @@ def gradio_video_processing2(
     imgsz=736,
     frame_skip=1,
 ):
-    global ort_session_2  # инициализирован глобально
+    global ort_session_2  # ort_session инициализирован глобально
 
 
     cap = cv2.VideoCapture(video_file)
@@ -682,8 +835,6 @@ def gradio_video_processing2(
         #         img_bgr = frame
 
         # img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-
         # annotation, h0, w0, imgsz = predict_jsons2(
         #     ort_session_2,
         #     img_rgb,
@@ -710,5 +861,3 @@ def gradio_video_processing2(
         os.remove(temp_path)
 
     return final_path
-
-
