@@ -3,7 +3,7 @@
 
 
 
-###  [Gradio](https://github.com/MALeyman/projects/tree/main/Gradio)
+###  [Сайт](https://huggingface.co/spaces/makc-mon173/projects)
 
 | Название                   | Описание                       | Ссылка                           |
 |----------------------------|--------------------------------|----------------------------------------------|
