@@ -127,7 +127,47 @@ def transform_text_2(text1, vocab, len_text, rand=False):
     return mass
 
 
+
+
+
+import os
+import random
+# Преобразование датасета разделение на данные и метки
+def create_dataset_no_split(base_path, vocab, len_text, rand=False):
+    ''' 
+    Преобразование датасета разделение на данные и метки
+    '''
+    classes = [folder for folder in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, folder))]
+    label_mapping = {1:0, 2:1, 3:2, 4:3, 7:4, 8:5, 9:6, 10:7}
+
+    all_data = []
+    all_labels = []
+
+    for cl in classes:
+        folder_path = os.path.join(base_path, cl)
+        files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+        random.shuffle(files)  # если нужна случайность в порядке
+
+        for file_name in files:
+            file_path = os.path.join(folder_path, file_name)
+            with open(file_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+            vec = transform_text_2(text, vocab, len_text, rand=rand)
+            all_data.append(vec)
+            all_labels.append(label_mapping[int(cl)])
+
+    return all_data, all_labels
+
+
+
+
+
+
+# Разделение датасета на сбалансированный train и test
 def create_balanced_and_test_datasets(base_path, vocab, len_text, rand=False):
+    ''' 
+    Разделение датасета на сбалансированный train и test из остатков
+    '''
     classes = [folder for folder in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, folder))]
     class_counts = {}
 
