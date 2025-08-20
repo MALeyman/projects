@@ -12,6 +12,7 @@ from projects.home_tab import home_tab
 from projects.detection_1 import get_detection_tab_1
 from projects.detection_2 import get_detection_tab_2
 from projects.interpolated import get_interpolated_tab
+from projects.imdb_classification import get_imdb_classification_tab
 
 def main():
     with gr.Blocks() as demo:
@@ -27,7 +28,7 @@ def main():
             with gr.TabItem("Интерполяция изображений"):
                 get_interpolated_tab()
             with gr.TabItem("Классификация отзывов"):
-                get_detection_tab_2()
+                get_imdb_classification_tab()
 
     demo.launch(debug=True)
 
